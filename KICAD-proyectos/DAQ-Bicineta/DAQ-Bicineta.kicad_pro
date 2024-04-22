@@ -495,8 +495,8 @@
       "plot": "../Gerbers-DAQ/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
-      "svg": "",
+      "step": "DAQ-Bicineta.step",
+      "svg": "./",
       "vrml": ""
     },
     "page_layout_descr_file": ""
