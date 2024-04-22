@@ -1,2 +1,2 @@
 # ESP32-DAQ
-Este repositorio contiene el código y diseño de un dispositivo de adquisición de datos para el sistema de batería de un vehículo eléctrico. Desarrollado con la ESP-WROOM-32, este dispositivo registra datos de corriente, tensión, velocidad y GPS de manera precisa y eficiente.
+This repository contains the code and design of a data acquisition device for the battery system of an electric vehicle. Developed with the ESP-WROOM-32, this device records current, voltage, speed and GPS data accurately and efficiently.
