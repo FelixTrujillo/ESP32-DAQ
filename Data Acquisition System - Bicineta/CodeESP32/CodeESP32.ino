@@ -11,6 +11,7 @@
 #define NMEA 0
 
 double pinA = 26; // Pin sensor efecto hall
+double pinB = 27; // Pin sensor efecto hall analogo
 double pinV = 33;  //Pin medir tension
 double pinI = 32; // Pin medir corriente ACS712
 double pin_I = 35; // Pin medir corriente PM
@@ -59,8 +60,8 @@ void setup() {
   Serial.begin(115200);
 
   gpsSerial.begin(GPS_BAUD, SERIAL_8N1, RXD2, TXD2);
-  pinMode(pinA, INPUT);
-  attachInterrupt(digitalPinToInterrupt(pinA), encoderMedicion, HIGH);
+  pinMode(pinB, INPUT);
+  attachInterrupt(pinB, encoderMedicion, FALLING);
 
   Time = millis();
 
@@ -90,6 +91,8 @@ void loop() {
   archivo = SD.open("/registro.CSV", FILE_APPEND);
 
   // Lectura de velocidad con el encoder
+  
+    //Serial.println(PPSCounter);
   if (millis() - Time >= 1000) {
     pulsos = PPSCounter;
     RPM = (60 * pulsos / PPR);
@@ -97,6 +100,8 @@ void loop() {
     pulsos = 0;
     Time = millis();
   }
+  
+  
 
   // lectura de datos de tension y corriente
   temperatura = getTemp(muestras);
@@ -106,7 +111,7 @@ void loop() {
   }
   else {
     corriente = getCurrent(muestras);
-    corriente1 = getCurrent1(muestras);
+    //corriente1 = getCurrent1(muestras);
   }
 
 
@@ -124,7 +129,12 @@ void loop() {
         minGPS = gps.time.minute();
         yearGPS = gps.date.year();
 
-        // Creacion String datos para la generacion del formato .CSV
+        
+      }
+    }
+  }
+
+  // Creacion String datos para la generacion del formato .CSV
         if (archivo) {
           datos = String(String(RPM) + "," + String(voltaje) + "," + String(corriente) + "," + String(corriente1) + "," + String(temperatura) +
                          "," + String(latGPS) + "," + String(longGPS) + "," + String(velGPS) + "," + String(numSat) + "," + String(altGPS) + "," + String(hourGPS) + "," + String(minGPS) +
@@ -144,9 +154,9 @@ void loop() {
         Serial.print(",");
         Serial.print("Corriente [A]: ");
         Serial.print(corriente);
-        Serial.print(",");
-        Serial.print("Corriente1 [A]: ");
-        Serial.print(corriente1);
+//        Serial.print(",");
+//        Serial.print("Corriente1 [A]: ");
+//        Serial.print(corriente1);
         Serial.print(",");
         Serial.print("Temperatura [°C]: ");
         Serial.print(temperatura);
@@ -175,21 +185,19 @@ void loop() {
         Serial.print(",");
         Serial.print("Año: ");
         Serial.println(yearGPS);
-      }
-    }
-  }
-
-
-  delay(100);
+        
+//        Serial.print("pinB: ");
+//        Serial.println(analogRead(pinB));
+//        Serial.print("Pulsos: ");
+//        Serial.println(pulsos);
+        delay(100);
 
 }
 
 void encoderMedicion() {
-
-  if (digitalRead(pinA)) {
-    PPSCounter++;
-  }
-
+  
+  PPSCounter++;
+  
 }
 
 double getCurrent(int numMuestras)
@@ -223,18 +231,18 @@ double getVoltage(int numMuestras1)
   return volt;
 }
 
-double getCurrent1(int numMuestras1)
-{
-  double iSensor1 = 0;
-  double current = 0;
-  for (int j = 0; j < numMuestras1; j++) {
-    iSensor1 = analogRead(pin_I);
-    current += iSensor1;
-  }
-  current = (current / numMuestras1);
-
-  return current;
-}
+//double getCurrent1(int numMuestras1)
+//{
+//  double iSensor1 = 0;
+//  double current = 0;
+//  for (int j = 0; j < numMuestras1; j++) {
+//    iSensor1 = analogRead(pin_I);
+//    current += iSensor1;
+//  }
+//  current = (current / numMuestras1);
+//
+//  return current;
+//}
 
 double getTemp(int numMuestras1)
 {
