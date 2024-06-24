@@ -12,6 +12,7 @@
 
 double pinA = 26; // Pin sensor efecto hall
 double pinB = 27; // Pin sensor efecto hall analogo
+volatile bool magnetDetected = false;  // Variable para almacenar el estado de detección del imán
 double pinV = 33;  //Pin medir tension
 double pinI = 32; // Pin medir corriente ACS712
 double pin_I = 35; // Pin medir corriente PM
@@ -36,16 +37,18 @@ double altGPS;
 int hourGPS;
 int minGPS;
 int yearGPS;
-double a = -0.010383;
-double b = 0.0022887;
-double c = -0.00012917;
-double d = 2.4609e-06;
+double a = -0.004699;
+double b = 0.0010707;
+double c = -4.3596e-05;
+double d = 5.0243e-07;
 
 volatile int PPSCounter = 0;
 unsigned int pulsos = 0;
 unsigned Time = 0;
 unsigned int RPM = 0; // Almacenador de valores de encoder
-int PPR = 1;
+unsigned int RPM_ANT = 0;
+int PPR = 26;
+
 
 double mVperAmp = 0.1;
 int muestras = 10000;
@@ -56,13 +59,17 @@ HardwareSerial gpsSerial(2);
 File archivo;
 String datos;
 
+void IRAM_ATTR magnetDetection();
+
 void setup() {
 
   Serial.begin(115200);
 
   gpsSerial.begin(GPS_BAUD, SERIAL_8N1, RXD2, TXD2);
-  pinMode(pinB, INPUT);
-  attachInterrupt(pinB, encoderMedicion, FALLING);
+
+  pinMode(pinA, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(pinA), magnetDetection, FALLING);
 
   Time = millis();
 
@@ -92,28 +99,17 @@ void loop() {
   archivo = SD.open("/registro.CSV", FILE_APPEND);
 
   // Lectura de velocidad con el encoder
-  
-    //Serial.println(PPSCounter);
-  if (millis() - Time >= 1000) {
-    pulsos = PPSCounter;
-    RPM = (60 * pulsos / PPR);
-    PPSCounter = 0;
-    pulsos = 0;
-    Time = millis();
-  }
-  
-  
-
+  RPM = getRPM();
   // lectura de datos de tension y corriente
   temperatura = getTemp(muestras);
   voltaje = getVoltage(muestras);
-  //if (voltaje == 0) {
-  //  corriente = 0;
-  //}
-  //else {
-  corriente = getCurrent(muestras);
+  if (voltaje == 0) {
+    corriente = 0;
+  }
+  else {
+    corriente = getCurrent(muestras);
     //corriente1 = getCurrent1(muestras);
-  //}
+  }
 
 
 
@@ -186,18 +182,34 @@ void loop() {
         Serial.print("Año: ");
         Serial.println(yearGPS);
         
-//        Serial.print("pinB: ");
-//        Serial.println(analogRead(pinB));
-//        Serial.print("Pulsos: ");
-//        Serial.println(pulsos);
         delay(100);
 
 }
 
-void encoderMedicion() {
-  
+
+void IRAM_ATTR magnetDetection(){
+
   PPSCounter++;
   
+}
+
+int getRPM(){
+
+  if (millis() - Time >= 1000) {
+      
+      pulsos = PPSCounter;
+      RPM_ANT = RPM;
+      RPM = (60 * pulsos / PPR);
+      PPSCounter = 0;
+      pulsos = 0;
+      Time = millis();
+
+  }
+
+  RPM = (RPM+RPM_ANT)/2;
+
+  return RPM;
+
 }
 
 double getCurrent(int numMuestras)
@@ -221,12 +233,16 @@ double getVoltage(int numMuestras1)
 {
   double vSensor1 = 0;
   double volt = 0;
+  double error = 0;
   for (int j = 0; j < numMuestras1; j++) {
     vSensor1 = analogRead(pinV) * 2 / 100.0;
     volt += vSensor1;
   }
   volt = (volt / numMuestras1);
-  if (volt < 0) {
+  error = 0.25729*volt-2.301628;
+  volt = volt - error;
+ 
+  if (volt < 0 || analogRead(pinV) == 0) {
     volt = 0;
   }
   return volt;
