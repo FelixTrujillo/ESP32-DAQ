@@ -11,24 +11,21 @@
 #define NMEA 0
 
 double pinA = 26; // Pin sensor efecto hall
-double pinB = 27; // Pin sensor efecto hall analogo
-volatile bool magnetDetected = false;  // Variable para almacenar el estado de detección del imán
-double pinV = 33;  //Pin medir tension
+double pinB = 27; // Pin sensor efecto hall analogo (No en uso)
+
+double pinV = 33;  //Pin medir tension PM
 double pinI = 32; // Pin medir corriente ACS712
-double pin_I = 35; // Pin medir corriente PM
+double pin_I = 35; // Pin medir corriente PM (No en uso)
 double pinT = 34; // Pin medir temperatura T-D500
-
-
-int i = 0;
-
-char datoCmd = 0;
 
 int pinCS = 5; // Pin modulo memoria
 
+// Inicializacion variables de corriente, tension y temperatura
 double corriente = 0;
-double corriente1 = 0;
 double temperatura = 0;
 double voltaje = 0;
+
+// Inicializacion vaiables del GPS
 double latGPS;
 double longGPS;
 double velGPS;
@@ -37,20 +34,25 @@ double altGPS;
 int hourGPS;
 int minGPS;
 int yearGPS;
+
+// Parametros sensor de temperatura
 double a = -0.004699;
 double b = 0.0010707;
 double c = -4.3596e-05;
 double d = 5.0243e-07;
 
-volatile int PPSCounter = 0;
-unsigned int pulsos = 0;
-unsigned Time = 0;
-unsigned int RPM = 0; // Almacenador de valores de encoder
-unsigned int RPM_ANT = 0;
-int PPR = 26;
+// Inicializacion variables sensor de velocidad (HY-024)
+volatile int PPSCounter = 0; // Contador de pulsos
+unsigned int pulsos = 0;     // Cantidad de pulsos en 1 segundo 
+unsigned Time = 0;           // Inicialización variable de tiempo
+unsigned int RPM = 0;        // Inicializacion variable de velocidad actual
+unsigned int RPM_ANT = 0;    // Inicializacion variable de velocidad anterior
+int PPR = 35;                // Numero de pulsos que detecta el sensor por vuelta
 
+// Parametros sensor de corriente ACS712
+double mVperAmp = 0.1;       // Sensibilidad sensor de corriente ACS712
 
-double mVperAmp = 0.1;
+// Numero de muestras para la medicion de datos
 int muestras = 10000;
 
 TinyGPSPlus gps;
@@ -60,6 +62,11 @@ File archivo;
 String datos;
 
 void IRAM_ATTR magnetDetection();
+int getRPM();
+double getCurrent(int numMuestras);
+double getVoltage(int numMuestras1);
+double getTemp(int numMuestras1);
+
 
 void setup() {
 
@@ -69,12 +76,11 @@ void setup() {
 
   pinMode(pinA, INPUT_PULLUP);
 
-  attachInterrupt(digitalPinToInterrupt(pinA), magnetDetection, FALLING);
+  attachInterrupt(digitalPinToInterrupt(pinA), magnetDetection, HIGH);
 
   Time = millis();
 
   pinMode(pinCS, OUTPUT);
-
   pinMode(pinV, INPUT);
   pinMode(pinI, INPUT);
 
@@ -90,7 +96,7 @@ void setup() {
     return;
   }
 
-  archivo.println("Velociad [RPM],Voltaje[V],Corriente[A],Corriente1[A],Temperatura[°C],Latitud,Longitud,Velocidad[GPS: km/h],Satelites, Altitud, Hora, Minutos, Year");
+  archivo.println("Velociad [RPM],Voltaje[V],Corriente[A],Temperatura[°C],Latitud,Longitud,Velocidad[GPS: km/h],Satelites, Altitud, Hora, Minutos, Year");
   archivo.close();
 }
 
@@ -100,15 +106,17 @@ void loop() {
 
   // Lectura de velocidad con el encoder
   RPM = getRPM();
-  // lectura de datos de tension y corriente
+
+  // Lectura de temperatura
   temperatura = getTemp(muestras);
+
+  // lectura de datos de tension y corriente
   voltaje = getVoltage(muestras);
-  if (voltaje == 0) {
+  if (voltaje == 0 || corriente < 0) {
     corriente = 0;
   }
   else {
     corriente = getCurrent(muestras);
-    //corriente1 = getCurrent1(muestras);
   }
 
 
@@ -126,13 +134,9 @@ void loop() {
         minGPS = gps.time.minute();
         yearGPS = gps.date.year();
 
-        
-      }
-    }
-  }
-  // Creacion String datos para la generacion del formato .CSV
+        // Creacion String datos para la generacion del formato .CSV
         if (archivo) {
-          datos = String(String(RPM) + "," + String(voltaje) + "," + String(corriente) + "," + String(corriente1) + "," + String(temperatura) +
+          datos = String(String(RPM) + "," + String(voltaje) + "," + String(corriente) + "," + String(temperatura) +
                          "," + String(latGPS) + "," + String(longGPS) + "," + String(velGPS) + "," + String(numSat) + "," + String(altGPS) + "," + String(hourGPS) + "," + String(minGPS) +
                          "," + String(yearGPS));
 
@@ -150,9 +154,6 @@ void loop() {
         Serial.print(",");
         Serial.print("Corriente [A]: ");
         Serial.print(corriente);
-//        Serial.print(",");
-//        Serial.print("Corriente1 [A]: ");
-//        Serial.print(corriente1);
         Serial.print(",");
         Serial.print("Temperatura [°C]: ");
         Serial.print(temperatura);
@@ -183,6 +184,10 @@ void loop() {
         Serial.println(yearGPS);
         
         delay(100);
+      }
+    }
+  }
+  
 
 }
 
@@ -194,9 +199,7 @@ void IRAM_ATTR magnetDetection(){
 }
 
 int getRPM(){
-
   if (millis() - Time >= 1000) {
-      
       pulsos = PPSCounter;
       RPM_ANT = RPM;
       RPM = (60 * pulsos / PPR);
@@ -212,8 +215,8 @@ int getRPM(){
 
 }
 
-double getCurrent(int numMuestras)
-{
+double getCurrent(int numMuestras){
+
   double vSensor = 0;
   double iSensor = 0;
   double error = 0;
@@ -229,8 +232,8 @@ double getCurrent(int numMuestras)
   return iSensor;
 }
 
-double getVoltage(int numMuestras1)
-{
+double getVoltage(int numMuestras1){
+
   double vSensor1 = 0;
   double volt = 0;
   double error = 0;
@@ -248,22 +251,7 @@ double getVoltage(int numMuestras1)
   return volt;
 }
 
-//double getCurrent1(int numMuestras1)
-//{
-//  double iSensor1 = 0;
-//  double current = 0;
-//  for (int j = 0; j < numMuestras1; j++) {
-//    iSensor1 = analogRead(pin_I);
-//    current += iSensor1;
-//  }
-
-//  current = (current / numMuestras1);
-//
-//  return current;
-//}
-
-double getTemp(int numMuestras1)
-{
+double getTemp(int numMuestras1){
   double RT = 0;
   double R2 = 150e3;
   double Vin = 3.3;
