@@ -36,18 +36,21 @@ int minGPS;
 int yearGPS;
 
 // Parametros sensor de temperatura
-double a = -0.004699;
-double b = 0.0010707;
-double c = -4.3596e-05;
-double d = 5.0243e-07;
+double a = -0.015769;
+double b = 0.0032072;
+double c = -0.00018051;
+double d = 3.3808e-06;
 
 // Inicializacion variables sensor de velocidad (HY-024)
 volatile int PPSCounter = 0; // Contador de pulsos
 unsigned int pulsos = 0;     // Cantidad de pulsos en 1 segundo 
 unsigned Time = 0;           // Inicialización variable de tiempo
-unsigned int RPM = 0;        // Inicializacion variable de velocidad actual
+float RPM = 0;        // Inicializacion variable de velocidad actual
 unsigned int RPM_ANT = 0;    // Inicializacion variable de velocidad anterior
-int PPR = 35;                // Numero de pulsos que detecta el sensor por vuelta
+int PPR = 1;                // Numero de pulsos que detecta el sensor por vuelta
+double debounceDelay = 250;
+double debounceTime = 0;
+double lastDebounceTime = 0;
 
 // Parametros sensor de corriente ACS712
 double mVperAmp = 0.1;       // Sensibilidad sensor de corriente ACS712
@@ -96,7 +99,7 @@ void setup() {
     return;
   }
 
-  archivo.println("Velociad [RPM],Voltaje[V],Corriente[A],Temperatura[°C],Latitud,Longitud,Velocidad[GPS: km/h],Satelites, Altitud, Hora, Minutos, Year");
+  archivo.println("Velocidad [RPM],Voltaje[V],Corriente[A],Temperatura[°C],Latitud,Longitud,Velocidad[GPS: km/h],Satelites, Altitud, Hora, Minutos, Year");
   archivo.close();
 }
 
@@ -134,10 +137,13 @@ void loop() {
         minGPS = gps.time.minute();
         yearGPS = gps.date.year();
 
-        // Creacion String datos para la generacion del formato .CSV
-        if (archivo) {
-          datos = String(String(RPM) + "," + String(voltaje) + "," + String(corriente) + "," + String(temperatura) +
-                         "," + String(latGPS) + "," + String(longGPS) + "," + String(velGPS) + "," + String(numSat) + "," + String(altGPS) + "," + String(hourGPS) + "," + String(minGPS) +
+        
+        
+  }}};
+  // Creacion String datos para la generacion del formato .CSV
+  if (archivo) {
+          datos = String(String(RPM) + "," + String(voltaje, 8) + "," + String(corriente, 8) + "," + String(temperatura, 8) +
+                         "," + String(latGPS, 15) + "," + String(longGPS, 15) + "," + String(velGPS, 8) + "," + String(numSat) + "," + String(altGPS, 8) + "," + String(hourGPS) + "," + String(minGPS) +
                          "," + String(yearGPS));
 
 
@@ -146,60 +152,66 @@ void loop() {
           archivo.close();
         };
 
-        Serial.print("Velocidad [RPM]: ");
-        Serial.print(RPM);
-        Serial.print(",");
-        Serial.print("Voltaje [V]: ");
-        Serial.print(voltaje);
-        Serial.print(",");
-        Serial.print("Corriente [A]: ");
-        Serial.print(corriente);
-        Serial.print(",");
-        Serial.print("Temperatura [°C]: ");
-        Serial.print(temperatura);
-        Serial.print(",");
-        // Lectura de datos GPS
-        Serial.print("Latitud: ");
-        Serial.print(latGPS);
-        Serial.print(",");
-        Serial.print("Longitud: ");
-        Serial.print(longGPS);
-        Serial.print(",");
-        Serial.print("Velocidad [km/h]: ");
-        Serial.print(velGPS);
-        Serial.print(",");
-        Serial.print("Satelites: ");
-        Serial.print(numSat);
-        Serial.print(",");
-        Serial.print("Altitud: ");
-        Serial.print(altGPS);
-        Serial.print(",");
-        Serial.print("Hora: ");
-        Serial.print(hourGPS);
-        Serial.print(",");
-        Serial.print("Minutos: ");
-        Serial.print(minGPS);
-        Serial.print(",");
-        Serial.print("Año: ");
-        Serial.println(yearGPS);
+        // Serial.print("Velocidad [RPM]: ");
+        // Serial.print(RPM);
+        // Serial.print(",");
+        // Serial.print("Voltaje [V]: ");
+        // Serial.print(voltaje);
+        // Serial.print(",");
+        // Serial.print("Corriente [A]: ");
+        // Serial.print(corriente);
+        // Serial.print(",");
+        // Serial.print("Temperatura [°C]: ");
+        // Serial.print(temperatura);
+        // Serial.print(",");
+        // // Lectura de datos GPS
+        // Serial.print("Latitud: ");
+        // Serial.print(latGPS);
+        // Serial.print(",");
+        // Serial.print("Longitud: ");
+        // Serial.print(longGPS);
+        // Serial.print(",");
+        // Serial.print("Velocidad [km/h]: ");
+        // Serial.print(velGPS);
+        // Serial.print(",");
+        // Serial.print("Satelites: ");
+        // Serial.print(numSat);
+        // Serial.print(",");
+        // Serial.print("Altitud: ");
+        // Serial.print(altGPS);
+        // Serial.print(",");
+        // Serial.print("Hora: ");
+        // Serial.print(hourGPS);
+        // Serial.print(",");
+        // Serial.print("Minutos: ");
+        // Serial.print(minGPS);
+        // Serial.print(",");
+        // Serial.print("Año: ");
+        // Serial.println(yearGPS);
         
         delay(100);
-      }
-    }
-  }
-  
-
+      
 }
 
 
 void IRAM_ATTR magnetDetection(){
 
-  PPSCounter++;
-  
+    debounceTime = millis();
+
+    if((debounceTime - lastDebounceTime) > debounceDelay){
+
+      PPSCounter++;
+      lastDebounceTime = debounceTime;
+
+    }
+    
+    
 }
 
 int getRPM(){
+  
   if (millis() - Time >= 1000) {
+
       pulsos = PPSCounter;
       RPM_ANT = RPM;
       RPM = (60 * pulsos / PPR);
@@ -209,7 +221,18 @@ int getRPM(){
 
   }
 
-  RPM = (RPM+RPM_ANT)/2;
+  if(RPM <= 350){
+    debounceDelay = 300;
+  }
+  else if(RPM > 350 && RPM <= 750){
+      debounceDelay = 120;
+  }
+  else if(RPM > 750 && RPM <= 1000){
+    debounceDelay = 70;
+  }
+  else if(RPM > 1000){
+    debounceDelay = 32;
+  }
 
   return RPM;
 
