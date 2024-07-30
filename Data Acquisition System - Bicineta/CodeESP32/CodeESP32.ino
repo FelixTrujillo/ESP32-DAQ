@@ -157,45 +157,45 @@ void loop() {
           archivo.close();
         };
 
-        Serial.print("Velocidad [RPM]: ");
-        Serial.print(RPM);
-        Serial.print(",");
-        Serial.print("Aceleracion [V_Acc]: ");
-        Serial.print(accelerator);
-        Serial.print(",");
-        Serial.print("Voltaje [V]: ");
-        Serial.print(voltaje);
-        Serial.print(",");
-        Serial.print("Corriente [A]: ");
-        Serial.print(corriente);
-        Serial.print(",");
-        Serial.print("Temperatura [°C]: ");
-        Serial.print(temperatura);
-        Serial.print(",");
-        // Lectura de datos GPS
-        Serial.print("Latitud: ");
-        Serial.print(latGPS);
-        Serial.print(",");
-        Serial.print("Longitud: ");
-        Serial.print(longGPS);
-        Serial.print(",");
-        Serial.print("Velocidad [km/h]: ");
-        Serial.print(velGPS);
-        Serial.print(",");
-        Serial.print("Satelites: ");
-        Serial.print(numSat);
-        Serial.print(",");
-        Serial.print("Altitud: ");
-        Serial.print(altGPS);
-        Serial.print(",");
-        Serial.print("Hora: ");
-        Serial.print(hourGPS);
-        Serial.print(",");
-        Serial.print("Minutos: ");
-        Serial.print(minGPS);
-        Serial.print(",");
-        Serial.print("Año: ");
-        Serial.println(yearGPS);
+        // Serial.print("Velocidad [RPM]: ");
+        // Serial.print(RPM);
+        // Serial.print(",");
+        // Serial.print("Aceleracion [V_Acc]: ");
+        // Serial.print(accelerator);
+        // Serial.print(",");
+        // Serial.print("Voltaje [V]: ");
+        // Serial.print(voltaje);
+        // Serial.print(",");
+        // Serial.print("Corriente [A]: ");
+        // Serial.print(corriente);
+        // Serial.print(",");
+        // Serial.print("Temperatura [°C]: ");
+        // Serial.print(temperatura);
+        // Serial.print(",");
+        // // Lectura de datos GPS
+        // Serial.print("Latitud: ");
+        // Serial.print(latGPS);
+        // Serial.print(",");
+        // Serial.print("Longitud: ");
+        // Serial.print(longGPS);
+        // Serial.print(",");
+        // Serial.print("Velocidad [km/h]: ");
+        // Serial.print(velGPS);
+        // Serial.print(",");
+        // Serial.print("Satelites: ");
+        // Serial.print(numSat);
+        // Serial.print(",");
+        // Serial.print("Altitud: ");
+        // Serial.print(altGPS);
+        // Serial.print(",");
+        // Serial.print("Hora: ");
+        // Serial.print(hourGPS);
+        // Serial.print(",");
+        // Serial.print("Minutos: ");
+        // Serial.print(minGPS);
+        // Serial.print(",");
+        // Serial.print("Año: ");
+        // Serial.println(yearGPS);
         
         delay(1000);
       
@@ -241,7 +241,7 @@ int getRPM(){
   else if(RPM > 1000){
     debounceDelay = 5;
   }
-  Serial.println(debounceDelay);
+  //Serial.println(debounceDelay);
   return RPM;
 
 }
