@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace Rocworks.Mqtt
 {
     public class MqttClient : MonoBehaviour
     {
-
         [Header("Configuration")]
         public string ClientId = "";
         public string Host = "";

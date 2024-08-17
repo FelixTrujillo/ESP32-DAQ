@@ -11,100 +11,28 @@ namespace Rocworks.Mqtt
         public MqttClient MqttClient;
         public GameObject ObjectToHandle;
         public Toggle IsConnected;
-        private InputField HostInput;
-        private InputField PortInput;
-        private InputField UsernameInput;
-        private InputField PasswordInput;
 
-        private float _floatMessage = 0;
-        private string _boolMessage = "";
-        private string _stringMessage = "";
+        private float _positionX = 0;
+        private float _positionY = 0;
+        private float _positionZ = 0;
 
+        private float _rotationX = 0;
+        private float _rotationY = 0;
+        private float _rotationZ = 0;
 
         // Start is called before the first frame update
         void Start()
         {
-            HostInput.onEndEdit.AddListener(OnInputTextHost);
-            PortInput.onEndEdit.AddListener(OnInputTextPort);
-            UsernameInput.onEndEdit.AddListener(OnInputTextUsername);
-            PasswordInput.onEndEdit.AddListener(OnInputTextPassword);
+
         }
 
         // Update is called once per frame
         void Update()
         {
-           
-            if(_stringMessage == "ON" || _boolMessage == "True" || _floatMessage >= 0)
-            {
-                this.ObjectToHandle.SetActive(true);
-            }
-            else if(_stringMessage == "OFF" || _boolMessage == "False")
-            {
-                this.ObjectToHandle.SetActive(false);
-            }
-                
+            this.ObjectToHandle.transform.position = new Vector3(_positionX, _positionY, _positionZ);
+            this.ObjectToHandle.transform.eulerAngles = new Vector3(_rotationX, _rotationY, _rotationZ);
             this.IsConnected.isOn = this.MqttClient.Connection.GetConnectState();
         }
-
-
-        // Configurations
-        public void OnInputTextHost(string value)
-        {
-            MqttClient.Host = value;
-            
-        }
-
-        public void OnInputTextPort(string value)
-        {
-            if (int.TryParse(value, out int port))
-            {
-                MqttClient.Port = port;
-            }
-            else
-            {
-                Debug.LogError("Invalid port number");
-            }
-        }
-
-        public void OnInputTextUsername(string value)
-        {
-            MqttClient.Username = value;
-        }
-
-        public void OnInputTextPassword(string value)
-        {
-            MqttClient.Password = value;
-        }
-
-        public void OnToggleButtonWebSocket(bool value)
-        {
-            MqttClient.Websocket = value;
-        }
-
-        public void OnInputTextWebsocketPath(string value)
-        {
-            MqttClient.WebsocketPath = value;
-        }
-
-        public void OnToggleButtonUseTLS(bool value)
-        {
-            MqttClient.UseTLS = value;
-        }
-
-        public void OnToggleButtonAllowUntrusted(bool value)
-        {
-            MqttClient.AllowUntrusted = value;
-        }
-
-        public void OnToggleButtonCleanSession(bool value)
-        {
-            MqttClient.CleanSession = value;
-        }
-
-
-
-
-        // Messages
 
         public void OnToggleButtonChanged(bool value)
         {
@@ -112,22 +40,35 @@ namespace Rocworks.Mqtt
             this.MqttClient.Connection.SetConnectFlag(value);
         }
 
-        public void OnSliderTurnLed(float value)
+        public void OnSliderPositionXChanged(float value)
         {
-            MqttClient.Connection.Publish("Rexroth/float/message", value.ToString(CultureInfo.InvariantCulture));
+            MqttClient.Connection.Publish("Rocworks/Cube/Position/X", value.ToString(CultureInfo.InvariantCulture));
         }
 
-        public void OnToggleTurnLed(bool value)
+        public void OnSliderPositionYChanged(float value)
         {
-            MqttClient.Connection.Publish("Rexroth/bool/message", value.ToString(CultureInfo.InvariantCulture));
+            MqttClient.Connection.Publish("Rocworks/Cube/Position/Y", value.ToString(CultureInfo.InvariantCulture));
         }
 
-        public void OnInputTextTurnLed(string value)
+        public void OnSliderPositionZChanged(float value)
         {
-            MqttClient.Connection.Publish("Rexroth/string/message", value);
+            MqttClient.Connection.Publish("Rocworks/Cube/Position/Z", value.ToString(CultureInfo.InvariantCulture));
         }
 
-        
+        public void OnSliderRotationXChanged(float value)
+        {
+            MqttClient.Connection.Publish("Rocworks/Cube/Rotation/X", value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void OnSliderRotationYChanged(float value)
+        {
+            MqttClient.Connection.Publish("Rocworks/Cube/Rotation/Y", value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void OnSliderRotationZChanged(float value)
+        {
+            MqttClient.Connection.Publish("Rocworks/Cube/Rotation/Z", value.ToString(CultureInfo.InvariantCulture));
+        }
 
         public void SetDebug(bool value)
         {
@@ -136,19 +77,29 @@ namespace Rocworks.Mqtt
 
         public void OnMessageArrived(MqttMessage m)
         {
-            switch (m.GetTopic())
-            {
-                case "Rexroth/float/message":
-                    _floatMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+            switch (m.GetTopic()) {
+                case "Rocworks/Cube/Position/X":
+                    _positionX = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
                     break;
-                case "Rexroth/bool/message":
-                    _boolMessage = m.GetString();
+                case "Rocworks/Cube/Position/Y":
+                    _positionY = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
                     break;
-                case "Rexroth/string/message":
-                    _stringMessage = m.GetString();
+                case "Rocworks/Cube/Position/Z":
+                    _positionZ = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
                     break;
-                
+                case "Rocworks/Cube/Rotation/X":
+                    _rotationX = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                    break;
+                case "Rocworks/Cube/Rotation/Y":
+                    _rotationY = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                    break;
+                case "Rocworks/Cube/Rotation/Z":
+                    _rotationZ = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                    break;             
             }
-        }
+        }    
     }
 }
+
+
+

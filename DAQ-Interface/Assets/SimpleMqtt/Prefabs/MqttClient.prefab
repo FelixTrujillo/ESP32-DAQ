@@ -55,19 +55,9 @@ MonoBehaviour:
   WebsocketPath: /mqtt
   UseTLS: 1
   AllowUntrusted: 0
-  CleanSession: 1
   ConnectTimeoutInSeconds: 3
   ReconnectInSeconds: 5
   DebugMessages: 0
-  BirthTopic: 
-  BirthMessage: Online
-  BirthQualityOfService: 0
-  BirthRetain: 1
-  WillTopic: 
-  WillMessage: Offline
-  WillQualityOfService: 0
-  WillRetain: 1
-  WillOnDisconnect: 1
   ConnectFlag: 1
   ConnectState: 0
   ReconnectTimer: 0
@@ -79,13 +69,9 @@ MonoBehaviour:
   OnDisconnected:
     m_PersistentCalls:
       m_Calls: []
-  BeforeDisconnected:
-    m_PersistentCalls:
-      m_Calls: []
   OnMessageArrived:
     m_PersistentCalls:
       m_Calls: []
-  OnMessageArrivedInUiThread: 1
 --- !u!114 &5484352570977323103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,7 +92,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5108482734855427872}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b76f4b72a59130478efd42f71dd6181, type: 3}
   m_Name: 
