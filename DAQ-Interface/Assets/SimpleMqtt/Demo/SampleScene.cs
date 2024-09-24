@@ -16,9 +16,42 @@ namespace Rocworks.Mqtt
         private InputField UsernameInput;
         private InputField PasswordInput;
 
-        private float _floatMessage = 0;
-        private string _boolMessage = "";
-        private string _stringMessage = "";
+        private float _voltageMessage = 0;
+        private float _currentMessage = 0;
+        private float _speedMessage = 0;
+        private float _accelerationMessage = 0;
+        private float _temperatureMessage = 0;
+        private float _altitudMessage = 0;
+
+
+        public voltageGraph voltage;
+        public voltageGraph voltage1;
+        public voltageGraph voltage2;
+        public digitalTwinGraph voltageDT;
+
+        public accelerationGraph acceleration;
+        public accelerationGraph acceleration1;
+        public accelerationGraph acceleration2;
+        public digitalTwinGraph accelerationDT;
+
+        public mapGraph altitud;
+        public mapGraph altitud1;
+        public mapGraph altitud2;
+        public digitalTwinGraph altitudDT;
+
+        public currentGraph current;
+        public currentGraph current1;
+        public digitalTwinGraph currentDT;
+
+        public speedGraph speed;
+        public speedGraph speed1;
+        public digitalTwinGraph speedDT;
+
+        public tempGraph temperature;
+        public tempGraph temperature1;
+
+        
+
 
 
         // Start is called before the first frame update
@@ -34,8 +67,31 @@ namespace Rocworks.Mqtt
         void Update()
         {
 
-           
-            
+            voltage.VoltageMessage(_voltageMessage);
+            voltage1.VoltageMessage(_voltageMessage);
+            voltage2.VoltageMessage(_voltageMessage);
+            voltageDT.VoltageMessage(_voltageMessage);
+
+            acceleration.AccelerationMessage(_accelerationMessage);
+            acceleration1.AccelerationMessage(_accelerationMessage);
+            acceleration2.AccelerationMessage(_accelerationMessage);
+            accelerationDT.AccelerationMessage(_accelerationMessage);
+
+            current.CurrentMessage(_currentMessage);
+            current1.CurrentMessage(_currentMessage);
+            currentDT.CurrentMessage(_currentMessage);
+
+            speed.SpeedMessage(_speedMessage);
+            speed1.SpeedMessage(_speedMessage);
+            speedDT.SpeedMessage(_speedMessage);
+
+            temperature.TemperatureMessage(_temperatureMessage);
+            temperature1.TemperatureMessage(_temperatureMessage);
+
+            altitud.AltitudeMessage(_altitudMessage);
+            altitud1.AltitudeMessage(_altitudMessage);
+            altitud2.AltitudeMessage(_altitudMessage);
+            altitudDT.AltitudeMessage(_altitudMessage);
         }
 
 
@@ -93,36 +149,37 @@ namespace Rocworks.Mqtt
             MqttClient.CleanSession = value;
         }
 
-
-
-
         // Messages
 
-        public void OnToggleButtonChanged(bool value)
-        {
-            Debug.Log("OnToggleButtonChanged");
-            this.MqttClient.Connection.SetConnectFlag(value);
-        }
-
-        public void OnSliderTurnLed(float value)
-        {
-            MqttClient.Connection.Publish("Rexroth/float/message", value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        public void OnToggleTurnLed(bool value)
-        {
-            MqttClient.Connection.Publish("Rexroth/bool/message", value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        public void OnInputTextTurnLed(string value)
-        {
-            MqttClient.Connection.Publish("Rexroth/string/message", value);
-        }
-
-        public void VerificationMessageLecture(string value)
+        public void voltageLecture(string value)
         {
             Debug.Log(value);
-            MqttClient.Connection.Publish("sensor1", value);
+            MqttClient.Connection.Publish("voltage", value);
+        }
+        public void currentLecture(string value)
+        {
+            Debug.Log(value);
+            MqttClient.Connection.Publish("current", value);
+        }
+        public void speedLecture(string value)
+        {
+            Debug.Log(value);
+            MqttClient.Connection.Publish("speed", value);
+        }
+        public void accelerationLecture(string value)
+        {
+            Debug.Log(value);
+            MqttClient.Connection.Publish("acceleration", value);
+        }
+        public void temperatureLecture(string value)
+        {
+            Debug.Log(value);
+            MqttClient.Connection.Publish("temperature", value);
+        }
+        public void altitudLecture(string value)
+        {
+            Debug.Log(value);
+            MqttClient.Connection.Publish("altitud", value);
         }
 
 
@@ -136,14 +193,23 @@ namespace Rocworks.Mqtt
         {
             switch (m.GetTopic())
             {
-                case "Rexroth/float/message":
-                    _floatMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                case "voltage":
+                    _voltageMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
                     break;
-                case "Rexroth/bool/message":
-                    _boolMessage = m.GetString();
+                case "current":
+                    _currentMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
                     break;
-                case "Rexroth/string/message":
-                    _stringMessage = m.GetString();
+                case "speed":
+                    _speedMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                    break;
+                case "acceleration":
+                    _accelerationMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                    break;
+                case "temperature":
+                    _temperatureMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
+                    break;
+                case "altitud":
+                    _altitudMessage = float.Parse(m.GetString(), CultureInfo.InvariantCulture);
                     break;
 
             }

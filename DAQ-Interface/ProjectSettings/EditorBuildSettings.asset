@@ -6,33 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/loginScene.unity
-    guid: 9593079387c34df41a9ccd99e8ecd203
-  - enabled: 1
-    path: Assets/Scenes/menuScene.unity
-    guid: 4ae3f1c12134f924dba6a1e243941ece
-  - enabled: 1
     path: Assets/Scenes/MQTT_Connection.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
-    path: Assets/Scenes/generalInformation.unity
-    guid: ee5e7dcb1a7675c4bbb610c37cf41657
-  - enabled: 1
-    path: Assets/Scenes/acelerationScene.unity
-    guid: b6fa7f5e900aa4046a8c59f7aa8f525d
-  - enabled: 1
-    path: Assets/Scenes/voltageScene.unity
-    guid: ae482df2f2140fe47901367cc8d60867
-  - enabled: 1
-    path: Assets/Scenes/currentScene.unity
-    guid: 2c044c41ab58deb458d4bfec02ca627b
-  - enabled: 1
-    path: Assets/Scenes/temperatureScene.unity
-    guid: 023cb5edd15d22947b47d444242fe3d7
-  - enabled: 1
-    path: Assets/Scenes/speedScene.unity
-    guid: e424a8271f033764e9d401e9fb7c95fe
-  - enabled: 1
-    path: Assets/Scenes/mapScene.unity
-    guid: f61b57c7c804f4840a8df5f0de1d7c5c
   m_configObjects: {}

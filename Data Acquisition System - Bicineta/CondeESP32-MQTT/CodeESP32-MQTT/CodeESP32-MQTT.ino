@@ -15,6 +15,23 @@
 #define GPS_BAUD 9600  // Velocidad de baudios del módulo GPS
 #define NMEA 0
 
+// =============================================================
+
+double pinA = 26; // Pin sensor efecto hall
+double pinB = 27; // Pin sensor efecto hall analogo (No en uso)
+
+double pinV = 33;  //Pin medir tension PM
+double pinI = 32; // Pin medir corriente ACS712
+double pin_I = 35; // Pin medir corriente PM (No en uso)
+double pinT = 34; // Pin medir temperatura T-D500
+
+int pinCS = 5; // Pin modulo memoria
+
+int pinACC = 39; // Pin Acelerador
+
+// =============================================================
+
+
 //---- WiFi settings
 const char* ssid = "UTP";
 const char* password = "tecnologica";
@@ -31,8 +48,13 @@ unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE (50)
 char msg[MSG_BUFFER_SIZE];
 
-const char* sensor1_topic= "sensor1";
-const char* sensor2_topic= "sensor2";
+const char* sensor1_topic= "voltage";
+const char* sensor2_topic= "current";
+const char* sensor3_topic= "speed";
+const char* sensor4_topic= "acceleration";
+const char* sensor5_topic= "temperature";
+const char* sensor6_topic= "altitud";
+
 
 static const char *root_ca PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
@@ -68,19 +90,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 )EOF";
 
-// =============================================================
 
-int pinA = 26; // Pin sensor efecto hall
-int pinB = 27; // Pin sensor efecto hall analogo (No en uso)
-
-int pinV = 33;  //Pin medir tension PM
-int pinI = 32; // Pin medir corriente ACS712
-int pin_I = 35; // Pin medir corriente PM (No en uso)
-int pinT = 34; // Pin medir temperatura T-D500
-
-int pinCS = 5; // Pin modulo memoria
-
-int pinACC = 25; // Pin Acelerador
 
 // Inicializacion variables de corriente, tension, temperatura y aceleracion
 double corriente = 0;
@@ -138,6 +148,12 @@ void setup() {
 
   Serial.begin(115200);
 
+  pinMode(pinCS, OUTPUT);
+  pinMode(pinV, INPUT);
+  pinMode(pinI, INPUT);
+  pinMode(pinACC, INPUT);
+  pinMode(pinA, INPUT_PULLUP);
+
   Serial.print("\nConnecting to ");
   Serial.println(ssid);
   WiFi.mode(WIFI_STA);
@@ -158,15 +174,11 @@ void setup() {
 
   gpsSerial.begin(GPS_BAUD, SERIAL_8N1, RXD2, TXD2);
 
-  pinMode(pinA, INPUT_PULLUP);
-
   attachInterrupt(digitalPinToInterrupt(pinA), magnetDetection, HIGH);
 
   Time = millis();
 
-  pinMode(pinCS, OUTPUT);
-  pinMode(pinV, INPUT);
-  pinMode(pinI, INPUT);
+  
 
   if (!SD.begin(pinCS)) {
     Serial.println("ERROR:\n Puerto CS no inicializado.");
@@ -240,48 +252,53 @@ void loop() {
           archivo.close();
         };
 
-        Serial.print("Velocidad [RPM]: ");
-        Serial.print(RPM);
-        Serial.print(",");
-        Serial.print("Aceleracion [V_Acc]: ");
-        Serial.print(accelerator);
-        Serial.print(",");
-        Serial.print("Voltaje [V]: ");
-        Serial.print(voltaje);
-        Serial.print(",");
-        Serial.print("Corriente [A]: ");
-        Serial.print(corriente);
-        Serial.print(",");
-        Serial.print("Temperatura [°C]: ");
-        Serial.print(temperatura);
-        Serial.print(",");
-        // Lectura de datos GPS
-        Serial.print("Latitud: ");
-        Serial.print(latGPS);
-        Serial.print(",");
-        Serial.print("Longitud: ");
-        Serial.print(longGPS);
-        Serial.print(",");
-        Serial.print("Velocidad [km/h]: ");
-        Serial.print(velGPS);
-        Serial.print(",");
-        Serial.print("Satelites: ");
-        Serial.print(numSat);
-        Serial.print(",");
-        Serial.print("Altitud: ");
-        Serial.print(altGPS);
-        Serial.print(",");
-        Serial.print("Hora: ");
-        Serial.print(hourGPS);
-        Serial.print(",");
-        Serial.print("Minutos: ");
-        Serial.print(minGPS);
-        Serial.print(",");
-        Serial.print("Año: ");
-        Serial.println(yearGPS);
+        // Serial.print("Velocidad [RPM]: ");
+        // Serial.print(RPM);
+        // Serial.print(",");
+        // Serial.print("Aceleracion [V_Acc]: ");
+        // Serial.print(accelerator);
+        // Serial.print(",");
+        // Serial.print("Voltaje [V]: ");
+        // Serial.print(voltaje);
+        // Serial.print(",");
+        // Serial.print("Corriente [A]: ");
+        // Serial.print(corriente);
+        // Serial.print(",");
+        // Serial.print("Temperatura [°C]: ");
+        // Serial.print(temperatura);
+        // Serial.print(",");
+        // // Lectura de datos GPS
+        // Serial.print("Latitud: ");
+        // Serial.print(latGPS);
+        // Serial.print(",");
+        // Serial.print("Longitud: ");
+        // Serial.print(longGPS);
+        // Serial.print(",");
+        // Serial.print("Velocidad [km/h]: ");
+        // Serial.print(velGPS);
+        // Serial.print(",");
+        // Serial.print("Satelites: ");
+        // Serial.print(numSat);
+        // Serial.print(",");
+        // Serial.print("Altitud: ");
+        // Serial.print(altGPS);
+        // Serial.print(",");
+        // Serial.print("Hora: ");
+        // Serial.print(hourGPS);
+        // Serial.print(",");
+        // Serial.print("Minutos: ");
+        // Serial.print(minGPS);
+        // Serial.print(",");
+        // Serial.print("Año: ");
+        // Serial.println(yearGPS);
         
         publishMessage(sensor1_topic,String(voltaje),true);    
         publishMessage(sensor2_topic,String(corriente),true);
+        publishMessage(sensor3_topic,String(RPM),true);
+        publishMessage(sensor4_topic,String(accelerator),true);
+        publishMessage(sensor5_topic,String(temperatura),true);
+        publishMessage(sensor6_topic,String(altGPS),true);
+
         delay(1000);
       
 }
@@ -297,7 +314,12 @@ void reconnect() {
     Serial.println("connected");
 
     client.subscribe(sensor1_topic);   // subscribe the topics here
-    //client.subscribe(command2_topic);   // subscribe the topics here
+    client.subscribe(sensor2_topic);   // subscribe the topics here
+    client.subscribe(sensor3_topic);   // subscribe the topics here
+    client.subscribe(sensor4_topic);   // subscribe the topics here
+    client.subscribe(sensor5_topic);   // subscribe the topics here
+    client.subscribe(sensor6_topic);   // subscribe the topics here
+    
   } else {
     Serial.print("failed, rc=");
     Serial.print(client.state());
@@ -398,7 +420,7 @@ double getVoltage(int numMuestras1){
     volt += vSensor1;
   }
   volt = (volt / numMuestras1);
-  error = 0.25729*volt-2.301628;
+  error = 0.29729*volt-2.301628;
   volt = volt - error;
  
   if (volt < 0 || analogRead(pinV) == 0) {
@@ -434,6 +456,7 @@ double getSignalAcceleration(int numMuestras1){
     VAcc = analogRead(pinACC)*3.3/4095;
     SignalAcc += VAcc;
   }
+  Serial.println(VAcc);
   SignalAcc = SignalAcc / numMuestras1;
   return SignalAcc;
 }

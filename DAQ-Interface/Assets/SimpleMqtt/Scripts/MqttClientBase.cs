@@ -116,7 +116,14 @@ namespace Rocworks.Mqtt
 
         private void OnDestroy()
         {
-            Disconnect();
+            if (Config != null && GetConnectState())
+            {
+                Disconnect();
+            }
+            else
+            {
+                //Debug.LogWarning("No se pudo desconectar el cliente MQTT porque 'Config' es nulo o el estado de conexión es falso.");
+            }
         }
 
         public abstract void Connect();

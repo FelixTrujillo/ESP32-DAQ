@@ -20,7 +20,7 @@ double pinT = 34; // Pin medir temperatura T-D500
 
 int pinCS = 5; // Pin modulo memoria
 
-int pinACC = 25; // Pin Acelerador
+int pinACC = 39;//25; // Pin Acelerador
 
 // Inicializacion variables de corriente, tension, temperatura y aceleracion
 double corriente = 0;
@@ -273,7 +273,7 @@ double getVoltage(int numMuestras1){
     volt += vSensor1;
   }
   volt = (volt / numMuestras1);
-  error = 0.25729*volt-2.301628;
+  error = 0.29729*volt-2.301628;
   volt = volt - error;
  
   if (volt < 0 || analogRead(pinV) == 0) {

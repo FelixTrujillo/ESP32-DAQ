@@ -19325,7 +19325,7 @@ MonoBehaviour:
     verticalViewSize: 10
     verticalViewOrigin: 0
     mSerializedData:
-    - Name: Player 1
+    - Name: Voltage
       InitialData: []
       IsBezierCurve: 0
       SegmentsPerCurve: 10
@@ -27633,6 +27633,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2008671951}
   - component: {fileID: 2008671952}
+  - component: {fileID: 2008671953}
   m_Layer: 0
   m_Name: DataInitializer
   m_TagString: Untagged
@@ -27662,13 +27663,26 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2008671950}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a164fb56dfb16e4f9c9c564daf9f5c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Graph: {fileID: 1449131615}
   TotalPoints: 2
+--- !u!114 &2008671953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008671950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc27789653fe80b468a2f3933c26aeb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chart: {fileID: 1449131615}
 --- !u!1 &2011361724
 GameObject:
   m_ObjectHideFlags: 43
